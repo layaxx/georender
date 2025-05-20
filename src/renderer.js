@@ -1,9 +1,9 @@
-import { document } from "./dom.js";
-import { defaults } from "./defaults.js";
-import { Map, View } from "ol";
-import { Tile as TileLayer, Vector as VectorLayer } from "ol/layer.js";
-import { Vector as VectorSource } from "ol/source.js";
-import { Importer } from "./importer.js";
+import { document } from './dom.js';
+import { defaults } from './defaults.js';
+import { Map, View } from 'ol';
+import { Tile as TileLayer, Vector as VectorLayer } from 'ol/layer.js';
+import { Vector as VectorSource } from 'ol/source.js';
+import { Importer } from './importer.js';
 import * as fs from 'fs';
 
 export class Renderer {
@@ -15,97 +15,97 @@ export class Renderer {
         const width = options.width || defaults.width;
         const height = options.height || defaults.height;
         const inputFiles = options.in || [];
-        const outputFile = options.out || "out.png";
+        const outputFile = options.out || 'out.png';
         const tile = defaults.tile[options.tile || 'osm'];
         const style = defaults.style;
         const padding = defaults.padding;
-    
+
         console.log('  width:', width);
         console.log('  height:', height);
         console.log('  input files:', inputFiles);
         console.log('  output file:', outputFile);
-    
+
         const timeout = setTimeout(reject, defaults.timeout * 1000);
-  
+
         const element = document.createElement('div');
         element.style.width = `${width}px`;
         element.style.height = `${height}px`;
         document.body.appendChild(element);
-    
+
         const map = new Map({ target: element });
         map.addLayer(new TileLayer({ source: tile }));
-    
+
         const featureSource = new VectorSource();
         const featureLayer = new VectorLayer({
           source: featureSource,
           style
         });
         map.addLayer(featureLayer);
-  
+
         const view = new View();
-        map.setView(view); 
-        
+        map.setView(view);
+
         const importer = new Importer();
         for (let i = 0; i < inputFiles.length; i++) {
           featureSource.addFeatures(await importer.importFile(inputFiles[i]));
         }
-  
+
         view.fit(featureSource.getExtent(), {
           size: map.getSize(),
           padding
         });
-  
-        map.on('postrender', async () => process.stdout.write("."));
-  
+
+        map.on('postrender', async () => process.stdout.write('.'));
+
         map.once('rendercomplete', async () => {
-          console.log("\nRender completed, saving image to", outputFile);
+          console.log('\nRender completed, saving image to', outputFile);
           clearTimeout(timeout);
-  
+
           const canvas = await this._processCanvas(map);
-          await this._saveImage(canvas, outputFile)
-  
+          await this._saveImage(canvas, outputFile);
+
           resolve();
-        })
-  
+        });
+
         map.renderSync();
-  
       } catch (err) {
         reject(err);
       }
     })
-    .then(() => console.log("Done!"))
-    .catch(err => console.error(err instanceof Error ? err.message : "\nTimeout!"))
-    ;
+      .then(() => console.log('Done!'))
+      .catch((err) =>
+        console.error(err instanceof Error ? err.message : '\nTimeout!', err)
+      );
   }
 
   async _processCanvas(map) {
-    // OpenLayers can use multiple canvases however it seems in Node.js 
+    // OpenLayers can use multiple canvases however it seems in Node.js
     // only one Canvas object is being used for rendering.
     // @TODO: May be needed to fix this in future.
-    const canvases = map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer');
+    const canvases = map
+      .getViewport()
+      .querySelectorAll('.ol-layer canvas, canvas.ol-layer');
     return canvases[0];
   }
 
   async _saveImage(canvas, filename) {
     let mimetype;
-    if (filename.toLowerCase().endsWith('.png'))
-      mimetype = 'image/png';
-    else if (filename.toLowerCase().endsWith('.jpg') || filename.toLowerCase().endsWith('.jpeg'))
+    if (filename.toLowerCase().endsWith('.png')) mimetype = 'image/png';
+    else if (
+      filename.toLowerCase().endsWith('.jpg') ||
+      filename.toLowerCase().endsWith('.jpeg')
+    )
       mimetype = 'image/jpeg';
-    else
-      throw new Error("Only PNG and JPEG output files are supported");
+    else throw new Error('Only PNG and JPEG output files are supported');
     return new Promise((resolve, reject) => {
-      canvas.toBlob(
-        blob => { 
-          const reader = new FileReader();
-          reader.onloadend = () => {
-            fs.writeFileSync(filename, reader.result, 'binary');
-            resolve();
-          };
-          reader.readAsBinaryString(blob);
-        },
-        mimetype
-      )
+      canvas.toBlob((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          fs.writeFileSync(filename, reader.result, 'binary');
+          resolve();
+        };
+        reader.readAsBinaryString(blob);
+      }, mimetype);
     });
   }
 }
