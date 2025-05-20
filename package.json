@@ -5,7 +5,8 @@
   "main": "src/module.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "unilauf": "./georender -i data/unilauf/Uni-Lauf_10km.gpx -t none -w 5000 -h 5000 -o data/unilauf/Uni-Lauf_10km.png"
   },
   "author": "Lukasz Cepowski <lukasz@cepowski.com> (https://loskoderos.com)",
   "license": "MIT",

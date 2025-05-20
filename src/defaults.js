@@ -1,8 +1,10 @@
 import { OSM, XYZ } from 'ol/source.js';
-import { Style, Icon, Circle, Fill, Stroke } from 'ol/style.js'
+import { Style, Icon, Circle, Fill, Stroke } from 'ol/style.js';
 
-const white   = 'rgba(255, 255, 255, 0.85)';
-const blue    = '#1267FF';
+const white = 'rgba(255, 255, 255, 0.85)';
+const blue = '#1267FF';
+const orange = '#FF7F00';
+const yellow = '#FFDE59';
 
 export const defaults = {
   width: 500,
@@ -20,14 +22,14 @@ export const defaults = {
     esri: new XYZ({
       url: 'https://server.arcgisonline.com//ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
       maxZoom: 23,
-      crossOrigin: 'anonymous' 
+      crossOrigin: 'anonymous'
     })
   },
   style: [
     new Style({
       stroke: new Stroke({
         color: white,
-        width: 6,
+        width: 6
       }),
       image: new Circle({
         radius: 6,
@@ -38,8 +40,8 @@ export const defaults = {
     }),
     new Style({
       stroke: new Stroke({
-        color: blue,
-        width: 5
+        color: yellow,
+        width: 58
       }),
       image: new Circle({
         radius: 4,
@@ -57,7 +59,7 @@ export const defaults = {
         opacity: 1,
         src: 'https://app.gpxlab.net/assets/pin.png'
       })
-    })  
+    })
   ],
   padding: [50, 50, 50, 50],
   timeout: 30
